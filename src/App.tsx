@@ -12,10 +12,11 @@ const App: React.FC = () => {
     [debouncedInputValue]
   );
   // current implementation assumes no suggestions for empty input
-  // passing empty string to prevent data load
+  //  prevent data load with empty url string
   const requestUrl = !!debouncedInputValue ? url : '';
   const { data: users, loading } = useFetch<User[]>(requestUrl);
   const suggestions = (!!users && users.map(user => user.name)) || [];
+
 
   return (
     <div className='app'>
