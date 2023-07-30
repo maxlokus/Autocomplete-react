@@ -1,6 +1,8 @@
 ## Note
 
 This project is developed and tested for win OS. Mac support may require some minor tweaks.
+
+Make sure to install dependencies first by running `npm install`.
 ## Available Scripts
 
 In the project directory, you can run:
