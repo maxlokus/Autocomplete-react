@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Spinner from '../Spinner/Spinner';
 import useOutsideClick from '../../hooks';
+import { highlightText } from './Autocomplete.utils';
 
 import './style.css';
 
@@ -27,8 +28,16 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestionListRef = useRef<HTMLDivElement>(null);
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-  const shouldDropdownOpen =
-    !!suggestions.length && !!value && suggestions.length === 1 ? suggestions[0] !== value : true;
+
+  const filtered = suggestions.filter(suggestion =>
+    suggestion.toLocaleLowerCase().includes(value.toLocaleLowerCase())
+  );
+
+  // check if current input matches the only suggestion available
+  const isCurrentMatch = filtered.length === 1 ? suggestions[0] === value : false;
+
+  const shouldDropdownOpen = suggestions.length && value.length && !isCurrentMatch;
+
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState<number>(-1);
 
@@ -77,12 +86,9 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   };
 
   const handleSuggestionSelect = (suggestion: string) => {
+    onInputChange(suggestion);
     setDropdownOpen(false);
     setSelectedSuggestionIndex(-1);
-
-    if (suggestion !== value) {
-      onInputChange(suggestion);
-    }
   };
 
   const handleInputFocus = () => {
@@ -95,20 +101,6 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   const handleInputBlur = () => {
     setIsFocused(false);
     setSelectedSuggestionIndex(-1);
-  };
-
-  const highlightText = (text: string) => {
-    const index = text.toLowerCase().indexOf(value.toLowerCase());
-    if (index >= 0) {
-      return (
-        <>
-          {text.substring(0, index)}
-          <span className='highlight'>{text.substring(index, index + value.length)}</span>
-          {text.substring(index + value.length)}
-        </>
-      );
-    }
-    return text;
   };
 
   useOutsideClick(containerRef, () => setDropdownOpen(false));
@@ -145,7 +137,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
       {dropdownOpen && (
         <div ref={suggestionListRef} className='suggestion-list fade-in'>
-          {suggestions.map((suggestion, index) => (
+          {filtered.map((suggestion, index) => (
             <div
               key={suggestion}
               className={`suggestion-item ${selectedSuggestionIndex === index ? 'selected' : ''}`}
@@ -156,7 +148,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
                 }
               }}
             >
-              {highlightText(suggestion)}
+              {highlightText(suggestion, value)}
             </div>
           ))}
         </div>

@@ -7,10 +7,13 @@ const App: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const debouncedInputValue = useDebounce(inputValue, 300);
 
-  const requestUrl = useMemo(
+  const url = useMemo(
     () => `https://jsonplaceholder.typicode.com/users?name_like=${debouncedInputValue}`,
     [debouncedInputValue]
   );
+  // current implementation assumes no suggestions for empty input
+  // passing empty string to prevent data load
+  const requestUrl = !!debouncedInputValue ? url : '';
   const { data: users, loading } = useFetch<User[]>(requestUrl);
   const suggestions = (!!users && users.map(user => user.name)) || [];
 
